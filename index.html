@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>BrianRides - Booking</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="config.js" defer></script>
+    <script src="script.js" defer></script>
+</head>
+<body>
+    <div class="container">
+        <img src="logo.png" alt="Logo" class="logo">
+        <h1>Your Ride. On Time. Every Time.</h1>
+        <form id="rideForm">
+            <input type="text" id="pickup" placeholder="Enter pickup address" required>
+            <input type="text" id="dropoff" placeholder="Enter dropoff address" required>
+            <button type="submit">Calculate Price</button>
+        </form>
+        <div id="result" class="hidden">
+            <p>Total Price: <strong id="priceDisplay"></strong></p>
+            <a id="payButton" href="#" target="_blank">Proceed to Payment</a>
+        </div>
+    </div>
+</body>
+</html>
