@@ -54,7 +54,7 @@ function loadGoogleMapsScript() {
         script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}&libraries=places&callback=initMap`;
         script.async = true;
         script.defer = true;
-        document.head.appendChild(script );
+        document.head.appendChild(script  );
 
         script.onload = () => {
             console.log('Google Maps API script loaded.');
@@ -345,19 +345,17 @@ window.addEventListener('DOMContentLoaded', () => {
     loadGoogleMapsScript();
 });
 
-// UPDATED: Use PlaceAutocompleteElement instead of Autocomplete
 window.initPlaceAutocompleteElements = function() {
-    console.log('Initializing Google Place Autocomplete (PlaceAutocompleteElement)...');
+    console.log('Initializing Google Place Autocomplete (traditional method)...');
 
-    // Pickup Autocomplete
-    const pickupAutocompleteElement = new google.maps.places.PlaceAutocompleteElement({
-        inputElement: pickupStreetInput,
-        fields: ["address_components", "formatted_address", "geometry"],
-        componentRestrictions: { country: "us" }
+    // Removed 'fields' property from the constructor
+    const pickupAutocomplete = new google.maps.places.Autocomplete(pickupStreetInput, {
+        types: ['address'],
+        componentRestrictions: { country: 'us' }
     });
 
-    pickupAutocompleteElement.addListener("place_changed", () => {
-        const place = pickupAutocompleteElement.place;
+    pickupAutocomplete.addListener('place_changed', () => {
+        const place = pickupAutocomplete.getPlace();
         if (place) {
             fillInAddress(place, 'pickup');
         } else {
@@ -365,15 +363,14 @@ window.initPlaceAutocompleteElements = function() {
         }
     });
 
-    // Dropoff Autocomplete
-    const dropoffAutocompleteElement = new google.maps.places.PlaceAutocompleteElement({
-        inputElement: dropoffStreetInput,
-        fields: ["address_components", "formatted_address", "geometry"],
-        componentRestrictions: { country: "us" }
+    // Removed 'fields' property from the constructor
+    const dropoffAutocomplete = new google.maps.places.Autocomplete(dropoffStreetInput, {
+        types: ['address'],
+        componentRestrictions: { country: 'us' }
     });
 
-    dropoffAutocompleteElement.addListener("place_changed", () => {
-        const place = dropoffAutocompleteElement.place;
+    dropoffAutocomplete.addListener('place_changed', () => {
+        const place = dropoffAutocomplete.getPlace();
         if (place) {
             fillInAddress(place, 'dropoff');
         } else {
