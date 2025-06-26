@@ -379,4 +379,3 @@ window.initPlaceAutocompleteElements = function() {
     });
     console.log('Google Place Autocomplete initialized.');
 };
-Start agent
