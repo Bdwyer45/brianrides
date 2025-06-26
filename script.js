@@ -345,17 +345,19 @@ window.addEventListener('DOMContentLoaded', () => {
     loadGoogleMapsScript();
 });
 
+// UPDATED: Use PlaceAutocompleteElement instead of Autocomplete
 window.initPlaceAutocompleteElements = function() {
-    console.log('Initializing Google Place Autocomplete (traditional method)...');
+    console.log('Initializing Google Place Autocomplete (PlaceAutocompleteElement)...');
 
-    const pickupAutocomplete = new google.maps.places.Autocomplete(pickupStreetInput, {
-        types: ['address'],
-        componentRestrictions: { country: 'us' },
-        fields: ['address_components', 'formatted_address', 'geometry']
+    // Pickup Autocomplete
+    const pickupAutocompleteElement = new google.maps.places.PlaceAutocompleteElement({
+        inputElement: pickupStreetInput,
+        fields: ["address_components", "formatted_address", "geometry"],
+        componentRestrictions: { country: "us" }
     });
 
-    pickupAutocomplete.addListener('place_changed', () => {
-        const place = pickupAutocomplete.getPlace();
+    pickupAutocompleteElement.addListener("place_changed", () => {
+        const place = pickupAutocompleteElement.place;
         if (place) {
             fillInAddress(place, 'pickup');
         } else {
@@ -363,14 +365,15 @@ window.initPlaceAutocompleteElements = function() {
         }
     });
 
-    const dropoffAutocomplete = new google.maps.places.Autocomplete(dropoffStreetInput, {
-        types: ['address'],
-        componentRestrictions: { country: 'us' },
-        fields: ['address_components', 'formatted_address', 'geometry']
+    // Dropoff Autocomplete
+    const dropoffAutocompleteElement = new google.maps.places.PlaceAutocompleteElement({
+        inputElement: dropoffStreetInput,
+        fields: ["address_components", "formatted_address", "geometry"],
+        componentRestrictions: { country: "us" }
     });
 
-    dropoffAutocomplete.addListener('place_changed', () => {
-        const place = dropoffAutocomplete.getPlace();
+    dropoffAutocompleteElement.addListener("place_changed", () => {
+        const place = dropoffAutocompleteElement.place;
         if (place) {
             fillInAddress(place, 'dropoff');
         } else {
