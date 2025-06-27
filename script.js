@@ -182,11 +182,11 @@ async function calculatePriceAndPrepareConfirmation() {
     priceLabel.classList.add('hidden');
     requestRideButton.classList.remove('hidden'); // Ensure button is visible
 
-    // --- UPDATED VALIDATION FOR PRICE CALCULATION (FIRST CLICK) ---
+    // --- VALIDATION FOR PRICE CALCULATION (FIRST CLICK) ---
     // Only require Street, City, State for price calculation. Zip is optional here.
     if (!pickupStreetInput.value.trim() || !pickupCityInput.value.trim() || !pickupStateInput.value.trim() ||
         !dropoffStreetInput.value.trim() || !dropoffCityInput.value.trim() || !dropoffStateInput.value.trim()) {
-        alert('Please fill in Street, City, and State for both Pickup and Drop-off addresses to get an estimated price.');
+        alert('PLEASE FILL IN STREET, CITY, AND STATE FOR BOTH PICKUP AND DROP-OFF ADDRESSES TO GET AN ESTIMATED PRICE.');
         requestRideButton.textContent = 'Reserve your Ride'; // Reset button text
         requestRideButton.disabled = false;
         isPriceCalculated = 0; // Reset state
@@ -231,7 +231,7 @@ async function calculatePriceAndPrepareConfirmation() {
                     console.log('Estimated Price:', `$${price.toFixed(2)}`);
 
                 } else {
-                    alert('Could not calculate distance. Please check addresses or try again later. Status: ' + status);
+                    alert('COULD NOT CALCULATE DISTANCE. PLEASE CHECK ADDRESSES OR TRY AGAIN LATER. STATUS: ' + status);
                     console.error('Distance Matrix Error:', response);
                     isPriceCalculated = 0; // Reset state on error
                     priceLabel.classList.add('hidden');
@@ -244,7 +244,7 @@ async function calculatePriceAndPrepareConfirmation() {
         );
     } catch (error) {
         console.error('Error during ride request:', error);
-        alert('An error occurred while processing your request. Please try again.');
+        alert('AN ERROR OCCURRED WHILE PROCESSING YOUR REQUEST. PLEASE TRY AGAIN.');
         isPriceCalculated = 0; // Reset state on error
         priceLabel.classList.add('hidden');
         totalPriceDisplay.classList.add('hidden');
@@ -276,11 +276,11 @@ requestRideButton.addEventListener('click', async () => { // Added async here
         const pickupTime = pickupTimeInput.value;
         const phoneNumber = phoneNumberInput.value.trim();
 
-        // Validate all required fields for submission
+        // Validate all required fields for submission (Zip Codes are now optional)
         if (!customerName || !pickupDate || !pickupTime || !phoneNumber ||
-            !pickupStreetInput.value.trim() || !pickupCityInput.value.trim() || !pickupStateInput.value.trim() || !pickupZipInput.value.trim() ||
-            !dropoffStreetInput.value.trim() || !dropoffCityInput.value.trim() || !dropoffStateInput.value.trim() || !dropoffZipInput.value.trim()) {
-            alert('Please fill in Your Name, Pickup Date, Pickup Time, Phone Number, and ALL address fields (Street, City, State, Zip) for both Pickup and Drop-off to confirm your ride.');
+            !pickupStreetInput.value.trim() || !pickupCityInput.value.trim() || !pickupStateInput.value.trim() ||
+            !dropoffStreetInput.value.trim() || !dropoffCityInput.value.trim() || !dropoffStateInput.value.trim()) {
+            alert('PLEASE FILL IN YOUR NAME, PICKUP DATE, PICKUP TIME, PHONE NUMBER, AND ALL REQUIRED ADDRESS FIELDS (STREET, CITY, STATE) FOR BOTH PICKUP AND DROP-OFF TO CONFIRM YOUR RIDE.');
             return; // Stop submission if validation fails
         }
 
@@ -304,7 +304,7 @@ requestRideButton.addEventListener('click', async () => { // Added async here
             if (response.ok) {
                 // Form submitted successfully
                 resultDiv.classList.add('hidden');
-                confirmationMessage.textContent = 'Thank you. A Confirmation Text will be sent shortly with Payment Options.';
+                confirmationMessage.textContent = 'THANK YOU. A CONFIRMATION TEXT WILL BE SENT SHORTLY WITH PAYMENT OPTIONS.';
                 confirmationMessage.classList.remove('hidden');
                 requestRideButton.classList.add('hidden'); // Hide the button after submission
                 isPriceCalculated = 2; // Set to final submitted state
@@ -312,7 +312,7 @@ requestRideButton.addEventListener('click', async () => { // Added async here
                 // Formspree returned an error (e.g., validation failed)
                 const errorData = await response.json();
                 console.error('Formspree submission error:', errorData);
-                alert('There was an error submitting your request. Please try again. If the problem persists, contact us directly.');
+                alert('THERE WAS AN ERROR SUBMITTING YOUR REQUEST. PLEASE TRY AGAIN. IF THE PROBLEM PERSISTS, CONTACT US DIRECTLY.');
                 requestRideButton.textContent = 'Confirm Ride'; // Allow retry
                 requestRideButton.disabled = false;
                 isPriceCalculated = 1; // Stay in calculated state
@@ -320,7 +320,7 @@ requestRideButton.addEventListener('click', async () => { // Added async here
         } catch (error) {
             // Network error or other fetch issue
             console.error('Network or submission error:', error);
-            alert('Could not connect to the server to submit your request. Please check your internet connection and try again.');
+            alert('COULD NOT CONNECT TO THE SERVER TO SUBMIT YOUR REQUEST. PLEASE CHECK YOUR INTERNET CONNECTION AND TRY AGAIN.');
             requestRideButton.textContent = 'Confirm Ride'; // Allow retry
             requestRideButton.disabled = false;
             isPriceCalculated = 1; // Stay in calculated state
@@ -337,12 +337,12 @@ const inputFields = [
     pickupAptInput,
     pickupCityInput,
     pickupStateInput,
-    pickupZipInput,
+    pickupZipInput, // Keep in this list so changing it resets the form
     dropoffStreetInput,
     dropoffAptInput,
     dropoffCityInput,
     dropoffStateInput,
-    dropoffZipInput,
+    dropoffZipInput, // Keep in this list so changing it resets the form
     phoneNumberInput
 ];
 
