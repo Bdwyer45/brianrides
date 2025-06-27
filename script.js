@@ -9,6 +9,10 @@ let currentCalculatedPrice = 0;
 // 2: Form submitted (confirmation message displayed)
 let isPriceCalculated = 0;
 
+// Global flags to track if autocomplete has been initialized for each input
+let pickupAutocompleteInitialized = false;
+let dropoffAutocompleteInitialized = false;
+
 // --- DOM Elements (General) ---
 const bookingForm = document.getElementById('bookingForm');
 const customerNameInput = document.getElementById('customerName');
@@ -52,14 +56,11 @@ const fullDropoffAddressInput = document.getElementById('fullDropoffAddress');
 
 // Function to load Google Maps API script dynamically
 function loadGoogleMapsScript() {
-    if (window.google && window.google.maps && window.google.maps.places) {
-        console.log('Google Maps API and Places library already loaded.');
-        // If already loaded, ensure initMap and initPlaceAutocompleteElements are called
+    if (window.google && window.google.maps) { // Check for google.maps, places library will be loaded by callback
+        console.log('Google Maps API already loaded.');
+        // If already loaded, ensure initMap is called if it hasn't been
         if (typeof window.initMap === 'function') {
             window.initMap();
-        } else {
-            // Fallback if initMap wasn't defined yet, but API is there
-            window.initPlaceAutocompleteElements();
         }
         return Promise.resolve();
     }
@@ -72,7 +73,7 @@ function loadGoogleMapsScript() {
 
         window.initMap = () => { // Define initMap globally for the callback
             console.log('Google Maps API initialized successfully.');
-            window.initPlaceAutocompleteElements();
+            // Autocomplete initialization is now handled when inputs are revealed
             resolve();
         };
         script.onerror = () => {
@@ -144,6 +145,33 @@ function formatPhoneNumber(value) {
     return formattedValue;
 }
 
+// Function to initialize Autocomplete for a specific input
+function initializeAutocompleteForInput(inputElement, prefix) {
+    if (prefix === 'pickup' && pickupAutocompleteInitialized) return;
+    if (prefix === 'dropoff' && dropoffAutocompleteInitialized) return;
+
+    console.log(`Initializing Google Place Autocomplete for ${prefix}StreetInput...`);
+
+    const autocomplete = new google.maps.places.Autocomplete(inputElement, {
+        types: ['address'],
+        componentRestrictions: { country: 'us' }
+    });
+
+    autocomplete.addListener('place_changed', () => {
+        const place = autocomplete.getPlace();
+        if (place) {
+            fillInAddress(place, prefix);
+        } else {
+            console.log(`No place selected for ${prefix}.`);
+        }
+    });
+
+    if (prefix === 'pickup') pickupAutocompleteInitialized = true;
+    if (prefix === 'dropoff') dropoffAutocompleteInitialized = true;
+    console.log(`Google Place Autocomplete initialized for ${prefix}StreetInput.`);
+}
+
+
 // Function to perform the distance calculation and display price
 async function calculatePriceAndPrepareConfirmation() {
     const origin = `${pickupStreetInput.value.trim()} ${pickupAptInput.value.trim()} ${pickupCityInput.value.trim()}, ${pickupStateInput.value.trim()} ${pickupZipInput.value.trim()}`.trim();
@@ -179,6 +207,7 @@ async function calculatePriceAndPrepareConfirmation() {
         // Ensure Google Maps API is loaded before using services
         await loadGoogleMapsScript();
 
+        // Initialize DistanceMatrixService here, as it depends on google.maps being loaded
         const service = new google.maps.DistanceMatrixService();
         service.getDistanceMatrix(
             {
@@ -198,7 +227,8 @@ async function calculatePriceAndPrepareConfirmation() {
                     totalPriceDisplay.classList.remove('hidden');
                     resultDiv.classList.remove('hidden'); // Show the price display container
 
-                    requestRideButton.textContent = 'CONFIRM RIDE & VIEW PAYMENT';
+                    // --- UPDATED BUTTON TEXT ---
+                    requestRideButton.textContent = 'Confirm Ride';
                     isPriceCalculated = 1; // Price is now calculated
 
                     estimatedPriceInput.value = price.toFixed(2); // Set hidden input for Formspree
@@ -260,8 +290,8 @@ requestRideButton.addEventListener('click', () => {
         stripeMessageDiv.classList.add('hidden');
         payLaterMessageDiv.classList.add('hidden');
 
-        // Display the final confirmation message to the user
-        confirmationMessage.textContent = 'Thank you! A confirmation text and email will be sent shortly with your reservation details and a payment link. Please check your phone and email.';
+        // --- UPDATED CONFIRMATION MESSAGE ---
+        confirmationMessage.textContent = 'A Confirmation Text will be sent shortly with Payment Options';
         confirmationMessage.classList.remove('hidden');
 
         requestRideButton.classList.add('hidden'); // Hide the button after submission
@@ -335,6 +365,8 @@ window.addEventListener('DOMContentLoaded', () => {
                 pickupAddressInputs.classList.remove('hidden');
                 pickupAddressDisplay.classList.add('hidden'); // Hide the display field
                 pickupStreetInput.focus();
+                // Initialize autocomplete when the input becomes visible
+                initializeAutocompleteForInput(pickupStreetInput, 'pickup');
             } else {
                 console.error('Error: pickupAddressInputs element not found for click listener.');
             }
@@ -349,6 +381,8 @@ window.addEventListener('DOMContentLoaded', () => {
                 dropoffAddressInputs.classList.remove('hidden');
                 dropoffAddressDisplay.classList.add('hidden'); // Hide the display field
                 dropoffStreetInput.focus();
+                // Initialize autocomplete when the input becomes visible
+                initializeAutocompleteForInput(dropoffStreetInput, 'dropoff');
             } else {
                 console.error('Error: dropoffAddressInputs element not found for click listener.');
             }
@@ -384,40 +418,6 @@ window.addEventListener('DOMContentLoaded', () => {
     const defaultTime = `${String(defaultHour).padStart(2, '0')}:${String(defaultMinute).padStart(2, '0')}`;
     pickupTimeInput.value = defaultTime;
 
-    // Load Google Maps API and initialize autocomplete
+    // Load Google Maps API script. Autocomplete initialization is now handled when inputs are revealed.
     loadGoogleMapsScript();
 });
-
-// Global function for Google Maps API callback
-window.initPlaceAutocompleteElements = function() {
-    console.log('Initializing Google Place Autocomplete (using Autocomplete class)...');
-
-    // Autocomplete for Pickup Street
-    const pickupAutocomplete = new google.maps.places.Autocomplete(pickupStreetInput, {
-        types: ['address'],
-        componentRestrictions: { country: 'us' }
-    });
-    pickupAutocomplete.addListener('place_changed', () => {
-        const place = pickupAutocomplete.getPlace();
-        if (place) {
-            fillInAddress(place, 'pickup');
-        } else {
-            console.log("No place selected for pickup.");
-        }
-    });
-
-    // Autocomplete for Drop-off Street
-    const dropoffAutocomplete = new google.maps.places.Autocomplete(dropoffStreetInput, {
-        types: ['address'],
-        componentRestrictions: { country: 'us' }
-    });
-    dropoffAutocomplete.addListener('place_changed', () => {
-        const place = dropoffAutocomplete.getPlace();
-        if (place) {
-            fillInAddress(place, 'dropoff');
-        } else {
-            console.log("No place selected for dropoff.");
-        }
-    });
-    console.log('Google Place Autocomplete initialized.');
-};
