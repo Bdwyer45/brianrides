@@ -276,11 +276,26 @@ requestRideButton.addEventListener('click', async () => { // Added async here
         const pickupTime = pickupTimeInput.value;
         const phoneNumber = phoneNumberInput.value.trim();
 
-        // Validate all required fields for submission (Zip Codes are now optional)
+        // Debugging: Log values before validation
+        console.log('--- Submission Validation Check ---');
+        console.log('Customer Name:', `"${customerName}"`, 'Empty:', !customerName);
+        console.log('Pickup Date:', `"${pickupDate}"`, 'Empty:', !pickupDate);
+        console.log('Pickup Time:', `"${pickupTime}"`, 'Empty:', !pickupTime);
+        console.log('Phone Number:', `"${phoneNumber}"`, 'Empty:', !phoneNumber);
+        console.log('Pickup Street:', `"${pickupStreetInput.value.trim()}"`, 'Empty:', !pickupStreetInput.value.trim());
+        console.log('Pickup City:', `"${pickupCityInput.value.trim()}"`, 'Empty:', !pickupCityInput.value.trim());
+        console.log('Pickup State:', `"${pickupStateInput.value.trim()}"`, 'Empty:', !pickupStateInput.value.trim());
+        console.log('Dropoff Street:', `"${dropoffStreetInput.value.trim()}"`, 'Empty:', !dropoffStreetInput.value.trim());
+        console.log('Dropoff City:', `"${dropoffCityInput.value.trim()}"`, 'Empty:', !dropoffCityInput.value.trim());
+        console.log('Dropoff State:', `"${dropoffStateInput.value.trim()}"`, 'Empty:', !dropoffStateInput.value.trim());
+        console.log('---------------------------------');
+
+
+        // Validate all required fields for submission (Zip Codes are optional)
         if (!customerName || !pickupDate || !pickupTime || !phoneNumber ||
             !pickupStreetInput.value.trim() || !pickupCityInput.value.trim() || !pickupStateInput.value.trim() ||
             !dropoffStreetInput.value.trim() || !dropoffCityInput.value.trim() || !dropoffStateInput.value.trim()) {
-            alert('PLEASE FILL IN YOUR NAME, PICKUP DATE, PICKUP TIME, PHONE NUMBER, AND ALL REQUIRED ADDRESS FIELDS (STREET, CITY, STATE) FOR BOTH PICKUP AND DROP-OFF TO CONFIRM YOUR RIDE.');
+            alert('PLEASE FILL IN ALL REQUIRED FIELDS TO CONFIRM YOUR RIDE.'); // Simplified alert message
             return; // Stop submission if validation fails
         }
 
