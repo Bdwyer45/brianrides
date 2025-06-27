@@ -190,7 +190,7 @@ async function calculatePriceAndPrepareConfirmation() {
     // Basic validation
     if (!customerName || !pickupDate || !pickupTime || !pickupStreetInput.value.trim() || !pickupCityInput.value.trim() || !pickupStateInput.value.trim() || !pickupZipInput.value.trim() || !dropoffStreetInput.value.trim() || !dropoffCityInput.value.trim() || !dropoffStateInput.value.trim() || !dropoffZipInput.value.trim() || !phoneNumber) {
         alert('Please fill in all required fields: Your Name, Pickup Date, Pickup Time, Pickup Street, City, State, Zip, Drop-off Street, City, State, Zip, and Phone Number.');
-        requestRideButton.textContent = 'BOOK-A-RIDE'; // Reset button text
+        requestRideButton.textContent = 'Reserve your Ride'; // Reset button text
         requestRideButton.disabled = false;
         isPriceCalculated = 0; // Reset state
         return;
@@ -245,7 +245,7 @@ async function calculatePriceAndPrepareConfirmation() {
                     priceLabel.classList.add('hidden');
                     totalPriceDisplay.classList.add('hidden');
                     resultDiv.classList.add('hidden');
-                    requestRideButton.textContent = 'BOOK-A-RIDE'; // Reset button text
+                    requestRideButton.textContent = 'Reserve your Ride'; // Reset button text
                 }
                 requestRideButton.disabled = false; // Re-enable button
             }
@@ -257,7 +257,7 @@ async function calculatePriceAndPrepareConfirmation() {
         priceLabel.classList.add('hidden');
         totalPriceDisplay.classList.add('hidden');
         resultDiv.classList.add('hidden');
-        requestRideButton.textContent = 'BOOK-A-RIDE'; // Reset button text
+        requestRideButton.textContent = 'Reserve your Ride'; // Reset button text
         requestRideButton.disabled = false;
     }
 }
@@ -348,7 +348,7 @@ inputFields.forEach(input => {
             priceLabel.classList.add('hidden');
             totalPriceDisplay.classList.add('hidden');
             requestRideButton.classList.remove('hidden'); // Show button
-            requestRideButton.textContent = 'BOOK-A-RIDE'; // Reset button text
+            requestRideButton.textContent = 'Reserve your Ride'; // Reset button text
             confirmationMessage.classList.add('hidden'); // Hide confirmation message
         }
     });
