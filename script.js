@@ -298,7 +298,7 @@ requestRideButton.addEventListener('click', async () => { // Added async here
             if (response.ok) {
                 // Form submitted successfully
                 resultDiv.classList.add('hidden');
-                confirmationMessage.textContent = 'A Confirmation Text will be sent shortly with Payment Options';
+                confirmationMessage.textContent = 'Thank you. A Confirmation Text will be Sent Shortly with Payment Options';
                 confirmationMessage.classList.remove('hidden');
                 requestRideButton.classList.add('hidden'); // Hide the button after submission
                 isPriceCalculated = 2; // Set to final submitted state
