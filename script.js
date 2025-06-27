@@ -236,6 +236,7 @@ payWithStripeButton.addEventListener('click', () => {
     resultDiv.classList.add('hidden');
     payLaterMessageDiv.classList.add('hidden');
     stripeMessageDiv.classList.remove('hidden');
+    bookingForm.submit();
 });
 
 payLaterButton.addEventListener('click', () => {
