@@ -226,7 +226,8 @@ requestRideButton.addEventListener('click', () => {
         calculateAndDisplayPrice();
     } else if (isPriceCalculated === 1) {
         resultDiv.classList.remove('hidden');
-        confirmationMessage.textContent = 'Your ride request is ready!';
+        confirmationMessage.textContent = 'Thank you! A confirmation text and email will be sent shortly with your reservation details and a payment link. Please check your phone and email.';
+    confirmationMessage.classList.remove('hidden');
         requestRideButton.classList.add('hidden');
         isPriceCalculated = 2;
     }
