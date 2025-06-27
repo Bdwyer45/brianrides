@@ -23,11 +23,9 @@ const requestRideButton = document.getElementById('requestRide');
 const resultDiv = document.getElementById('result');
 const totalPriceDisplay = document.getElementById('totalPrice');
 const priceLabel = document.querySelector('.price-label');
-const confirmationMessage = document.getElementById('confirmationMessage');
+const confirmationMessage = document.getElementById('confirmationMessage'); // This is now a <p> tag
 
-// These elements are now hidden/removed from UI, but kept in JS for reference if needed
-const payWithStripeButton = document.getElementById('payWithStripe');
-const payLaterButton = document.getElementById('payLater');
+// These elements are now removed from HTML, but kept in JS for robustness if IDs somehow persist
 const stripeMessageDiv = document.getElementById('stripeMessage');
 const payLaterMessageDiv = document.getElementById('payLaterMessage');
 
@@ -73,7 +71,7 @@ function loadGoogleMapsScript() {
 
         window.initMap = () => { // Define initMap globally for the callback
             console.log('Google Maps API initialized successfully.');
-            // Autocomplete initialization is now handled when inputs are revealed
+            // Autocomplete initialization is now handled when inputs are revealed.
             resolve();
         };
         script.onerror = () => {
@@ -150,7 +148,7 @@ function initializeAutocompleteForInput(inputElement, prefix) {
     if (prefix === 'pickup' && pickupAutocompleteInitialized) return;
     if (prefix === 'dropoff' && dropoffAutocompleteInitialized) return;
 
-    console.log(`Initializing Google Place Autocomplete for ${prefix}StreetInput...`);
+    console.log(`Initializing Google Place Autocomplete for ${inputElement.id}...`);
 
     const autocomplete = new google.maps.places.Autocomplete(inputElement, {
         types: ['address'],
@@ -168,7 +166,7 @@ function initializeAutocompleteForInput(inputElement, prefix) {
 
     if (prefix === 'pickup') pickupAutocompleteInitialized = true;
     if (prefix === 'dropoff') dropoffAutocompleteInitialized = true;
-    console.log(`Google Place Autocomplete initialized for ${prefix}StreetInput.`);
+    console.log(`Google Place Autocomplete initialized for ${inputElement.id}.`);
 }
 
 
@@ -184,10 +182,8 @@ async function calculatePriceAndPrepareConfirmation() {
 
     // Clear previous messages/displays
     resultDiv.classList.add('hidden');
-    stripeMessageDiv.classList.add('hidden');
-    payLaterMessageDiv.classList.add('hidden');
+    confirmationMessage.classList.add('hidden'); // Hide confirmation message
     totalPriceDisplay.textContent = '';
-    confirmationMessage.textContent = '';
     priceLabel.classList.add('hidden');
     requestRideButton.classList.remove('hidden'); // Ensure button is visible
 
@@ -277,51 +273,54 @@ phoneNumberInput.addEventListener('input', (e) => {
 });
 
 // Main Request Ride Button Logic
-requestRideButton.addEventListener('click', () => {
+requestRideButton.addEventListener('click', async () => { // Added async here
     if (isPriceCalculated === 0) {
         // First click: Calculate price
         calculatePriceAndPrepareConfirmation();
     } else if (isPriceCalculated === 1) {
-        // Second click: Submit form and show final confirmation message
-        bookingForm.submit(); // Submit the form to Formspree
+        // Second click: Submit form data asynchronously and show final confirmation message
+        requestRideButton.textContent = 'Submitting...';
+        requestRideButton.disabled = true;
 
-        // Hide price display and other messages
-        resultDiv.classList.add('hidden');
-        // The following are now hidden by HTML/CSS, but good to keep for robustness
-        if (stripeMessageDiv) stripeMessageDiv.classList.add('hidden');
-        if (payLaterMessageDiv) payLaterMessageDiv.classList.add('hidden');
+        const form = bookingForm;
+        const formData = new FormData(form);
+        const formUrl = form.action;
 
-        // --- UPDATED CONFIRMATION MESSAGE ---
-        confirmationMessage.textContent = 'A Confirmation Text will be sent shortly with Payment Options';
-        confirmationMessage.classList.remove('hidden');
+        try {
+            const response = await fetch(formUrl, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'Accept': 'application/json' // Important for Formspree AJAX
+                }
+            });
 
-        requestRideButton.classList.add('hidden'); // Hide the button after submission
-        isPriceCalculated = 2; // Set to final submitted state
+            if (response.ok) {
+                // Form submitted successfully
+                resultDiv.classList.add('hidden');
+                confirmationMessage.textContent = 'A Confirmation Text will be sent shortly with Payment Options';
+                confirmationMessage.classList.remove('hidden');
+                requestRideButton.classList.add('hidden'); // Hide the button after submission
+                isPriceCalculated = 2; // Set to final submitted state
+            } else {
+                // Formspree returned an error (e.g., validation failed)
+                const errorData = await response.json();
+                console.error('Formspree submission error:', errorData);
+                alert('There was an error submitting your request. Please try again. If the problem persists, contact us directly.');
+                requestRideButton.textContent = 'Confirm Ride'; // Allow retry
+                requestRideButton.disabled = false;
+                isPriceCalculated = 1; // Stay in calculated state
+            }
+        } catch (error) {
+            // Network error or other fetch issue
+            console.error('Network or submission error:', error);
+            alert('Could not connect to the server to submit your request. Please check your internet connection and try again.');
+            requestRideButton.textContent = 'Confirm Ride'; // Allow retry
+            requestRideButton.disabled = false;
+            isPriceCalculated = 1; // Stay in calculated state
+        }
     }
 });
-
-// --- COMMENTED OUT: Old Stripe and Pay Later button logic ---
-// These event listeners are no longer needed as the main button handles submission
-// and the payment link is sent manually by the driver.
-/*
-if (payWithStripeButton) {
-    payWithStripeButton.addEventListener('click', () => {
-        resultDiv.classList.add('hidden');
-        if (payLaterMessageDiv) payLaterMessageDiv.classList.add('hidden');
-        if (stripeMessageDiv) stripeMessageDiv.classList.remove('hidden');
-        bookingForm.submit(); // Submit the form to Formspree
-    });
-}
-
-if (payLaterButton) {
-    payLaterButton.addEventListener('click', () => {
-        resultDiv.classList.add('hidden');
-        if (stripeMessageDiv) stripeMessageDiv.classList.add('hidden');
-        if (payLaterMessageDiv) payLaterMessageDiv.classList.remove('hidden');
-        bookingForm.submit(); // Submit the form to Formspree
-    });
-}
-*/
 
 // Reset state if any input field changes after price calculation
 const inputFields = [
@@ -350,8 +349,6 @@ inputFields.forEach(input => {
             totalPriceDisplay.classList.add('hidden');
             requestRideButton.classList.remove('hidden'); // Show button
             requestRideButton.textContent = 'BOOK-A-RIDE'; // Reset button text
-            if (stripeMessageDiv) stripeMessageDiv.classList.add('hidden');
-            if (payLaterMessageDiv) payLaterMessageDiv.classList.add('hidden');
             confirmationMessage.classList.add('hidden'); // Hide confirmation message
         }
     });
@@ -360,8 +357,8 @@ inputFields.forEach(input => {
 // --- Initial Setup on DOM Load ---
 window.addEventListener('DOMContentLoaded', () => {
     // These are the containers for the detailed address inputs, not the display fields
-    const pickupAddressDetails = document.getElementById('pickupAddressDetails'); // Corrected ID
-    const dropoffAddressDetails = document.getElementById('dropoffAddressDetails'); // Corrected ID
+    const pickupAddressDetails = document.getElementById('pickupAddressDetails');
+    const dropoffAddressDetails = document.getElementById('dropoffAddressDetails');
 
     // Event listeners for the display fields to show detailed inputs
     if (pickupAddressDisplay) {
