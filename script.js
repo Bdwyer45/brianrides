@@ -175,11 +175,6 @@ async function calculatePriceAndPrepareConfirmation() {
     const origin = `${pickupStreetInput.value.trim()} ${pickupAptInput.value.trim()} ${pickupCityInput.value.trim()}, ${pickupStateInput.value.trim()} ${pickupZipInput.value.trim()}`.trim();
     const destination = `${dropoffStreetInput.value.trim()} ${dropoffAptInput.value.trim()} ${dropoffCityInput.value.trim()}, ${dropoffStateInput.value.trim()} ${dropoffZipInput.value.trim()}`.trim();
 
-    const phoneNumber = phoneNumberInput.value.trim();
-    const customerName = customerNameInput.value.trim();
-    const pickupDate = pickupDateInput.value;
-    const pickupTime = pickupTimeInput.value;
-
     // Clear previous messages/displays
     resultDiv.classList.add('hidden');
     confirmationMessage.classList.add('hidden'); // Hide confirmation message
@@ -187,9 +182,11 @@ async function calculatePriceAndPrepareConfirmation() {
     priceLabel.classList.add('hidden');
     requestRideButton.classList.remove('hidden'); // Ensure button is visible
 
-    // Basic validation
-    if (!customerName || !pickupDate || !pickupTime || !pickupStreetInput.value.trim() || !pickupCityInput.value.trim() || !pickupStateInput.value.trim() || !pickupZipInput.value.trim() || !dropoffStreetInput.value.trim() || !dropoffCityInput.value.trim() || !dropoffStateInput.value.trim() || !dropoffZipInput.value.trim() || !phoneNumber) {
-        alert('Please fill in all required fields: Your Name, Pickup Date, Pickup Time, Pickup Street, City, State, Zip, Drop-off Street, City, State, Zip, and Phone Number.');
+    // --- UPDATED VALIDATION FOR PRICE CALCULATION (FIRST CLICK) ---
+    // Only require Street, City, State for price calculation. Zip is optional here.
+    if (!pickupStreetInput.value.trim() || !pickupCityInput.value.trim() || !pickupStateInput.value.trim() ||
+        !dropoffStreetInput.value.trim() || !dropoffCityInput.value.trim() || !dropoffStateInput.value.trim()) {
+        alert('Please fill in Street, City, and State for both Pickup and Drop-off addresses to get an estimated price.');
         requestRideButton.textContent = 'Reserve your Ride'; // Reset button text
         requestRideButton.disabled = false;
         isPriceCalculated = 0; // Reset state
@@ -223,19 +220,14 @@ async function calculatePriceAndPrepareConfirmation() {
                     totalPriceDisplay.classList.remove('hidden');
                     resultDiv.classList.remove('hidden'); // Show the price display container
 
-                    // --- UPDATED BUTTON TEXT ---
                     requestRideButton.textContent = 'Confirm Ride';
                     isPriceCalculated = 1; // Price is now calculated
 
                     estimatedPriceInput.value = price.toFixed(2); // Set hidden input for Formspree
 
                     console.log('Ride Request Details:');
-                    console.log('Customer Name:', customerName);
-                    console.log('Pickup Date:', pickupDate);
-                    console.log('Pickup Time:', pickupTime);
                     console.log('Pickup:', origin);
                     console.log('Drop-off:', destination);
-                    console.log('Phone:', phoneNumber);
                     console.log('Estimated Price:', `$${price.toFixed(2)}`);
 
                 } else {
@@ -278,6 +270,20 @@ requestRideButton.addEventListener('click', async () => { // Added async here
         // First click: Calculate price
         calculatePriceAndPrepareConfirmation();
     } else if (isPriceCalculated === 1) {
+        // --- UPDATED VALIDATION FOR FORM SUBMISSION (SECOND CLICK) ---
+        const customerName = customerNameInput.value.trim();
+        const pickupDate = pickupDateInput.value;
+        const pickupTime = pickupTimeInput.value;
+        const phoneNumber = phoneNumberInput.value.trim();
+
+        // Validate all required fields for submission
+        if (!customerName || !pickupDate || !pickupTime || !phoneNumber ||
+            !pickupStreetInput.value.trim() || !pickupCityInput.value.trim() || !pickupStateInput.value.trim() || !pickupZipInput.value.trim() ||
+            !dropoffStreetInput.value.trim() || !dropoffCityInput.value.trim() || !dropoffStateInput.value.trim() || !dropoffZipInput.value.trim()) {
+            alert('Please fill in Your Name, Pickup Date, Pickup Time, Phone Number, and ALL address fields (Street, City, State, Zip) for both Pickup and Drop-off to confirm your ride.');
+            return; // Stop submission if validation fails
+        }
+
         // Second click: Submit form data asynchronously and show final confirmation message
         requestRideButton.textContent = 'Submitting...';
         requestRideButton.disabled = true;
@@ -298,7 +304,7 @@ requestRideButton.addEventListener('click', async () => { // Added async here
             if (response.ok) {
                 // Form submitted successfully
                 resultDiv.classList.add('hidden');
-                confirmationMessage.textContent = 'Thank you. A Confirmation Text will be Sent Shortly with Payment Options';
+                confirmationMessage.textContent = 'Thank you. A Confirmation Text will be sent shortly with Payment Options.';
                 confirmationMessage.classList.remove('hidden');
                 requestRideButton.classList.add('hidden'); // Hide the button after submission
                 isPriceCalculated = 2; // Set to final submitted state
