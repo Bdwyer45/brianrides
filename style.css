@@ -13,12 +13,17 @@ body {
     width: 120px;
     margin-bottom: 20px;
 }
-input, button {
+/* THIS IS THE SECTION WE ARE CHANGING */
+input, button, textarea { /* ADDED 'textarea' HERE */
     width: 100%;
     padding: 12px;
     margin: 10px 0;
     border: none;
     border-radius: 5px;
+    /* The background-color and color for the fields are set in the HTML's inline style or a different CSS rule.
+       We will add them here to ensure consistency. */
+    background-color: #5a3d8b; /* Light purple */
+    color: #ffffff; /* White text */
 }
 button {
     background-color: #f7b731;
