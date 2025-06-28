@@ -454,3 +454,18 @@ window.addEventListener('DOMContentLoaded', () => {
     // Load Google Maps API script. Autocomplete initialization is now handled when inputs are revealed.
     loadGoogleMapsScript();
 });
+// --- Temporary Styling Fix for Textarea ---
+// This ensures the textarea matches the input field styling if not applied by CSS
+document.addEventListener('DOMContentLoaded', () => {
+    const specialNotesTextarea = document.getElementById('specialNotes');
+    if (specialNotesTextarea) {
+        specialNotesTextarea.style.backgroundColor = '#5a3d8b'; // Light purple
+        specialNotesTextarea.style.color = '#ffffff'; // White text
+        specialNotesTextarea.style.fontSize = '1em'; // Match font size
+        specialNotesTextarea.style.padding = '12px'; // Match padding
+        specialNotesTextarea.style.marginBottom = '15px'; // Match margin
+        specialNotesTextarea.style.border = 'none'; // Remove border
+        specialNotesTextarea.style.borderRadius = '8px'; // Match border-radius
+        specialNotesTextarea.style.boxSizing = 'border-box'; // Match box-sizing
+    }
+});
