@@ -151,7 +151,7 @@ function initializeAutocompleteForInput(inputElement, prefix) {
     console.log(`Initializing Google Place Autocomplete for ${inputElement.id}...`);
 
     const autocomplete = new google.maps.places.Autocomplete(inputElement, {
-        types: ['address'],
+        // types: ['address'],
         componentRestrictions: { country: 'us' }
     });
 
