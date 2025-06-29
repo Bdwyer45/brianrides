@@ -307,96 +307,58 @@ requestRideButton.addEventListener('click', async () => { // Added async here
         const formData = new FormData(form);
         const formUrl = form.action;
 
-        try {
-            const response = await fetch(formUrl, {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'Accept': 'application/json' // Important for Formspree AJAX
-                }
-            });
+       document.getElementById('requestRide').addEventListener('click', async function(event) {
+    event.preventDefault(); // Stop the form from submitting the old way
 
-            if (response.ok) {
-                // Form submitted successfully
-                resultDiv.classList.add('hidden');
-                confirmationMessage.textContent = 'THANK YOU. A CONFIRMATION TEXT WILL BE SENT SHORTLY WITH PAYMENT OPTIONS.';
-                confirmationMessage.classList.remove('hidden');
-                requestRideButton.classList.add('hidden'); // Hide the button after submission
-                isPriceCalculated = 2; // Set to final submitted state
-            } else {
-                // Formspree returned an error (e.g., validation failed)
-                const errorData = await response.json();
-                console.error('Formspree submission error:', errorData);
-                alert('THERE WAS AN ERROR SUBMITTING YOUR REQUEST. PLEASE TRY AGAIN. IF THE PROBLEM PERSISTS, CONTACT US DIRECTLY.');
-                requestRideButton.textContent = 'Confirm Ride'; // Allow retry
-                requestRideButton.disabled = false;
-                isPriceCalculated = 1; // Stay in calculated state
-            }
-        } catch (error) {
-            // Network error or other fetch issue
-            console.error('Network or submission error:', error);
-            alert('COULD NOT CONNECT TO THE SERVER TO SUBMIT YOUR REQUEST. PLEASE CHECK YOUR INTERNET CONNECTION AND TRY AGAIN.');
-            requestRideButton.textContent = 'Confirm Ride'; // Allow retry
-            requestRideButton.disabled = false;
-            isPriceCalculated = 1; // Stay in calculated state
-        }
+    // --- YOUR EXISTING VALIDATION CODE GOES HERE ---
+    // This code block starts with 'const customerName = customerNameInput.value.trim();'
+    // and ends with 'return; // Stop submission if validation fails'
+    // It is currently from line 321 to line 347 in your provided script.js.
+    // PASTE THAT ENTIRE BLOCK OF CODE HERE.
+    // --- END OF YOUR EXISTING VALIDATION CODE ---
+
+    const form = document.getElementById('bookingForm');
+    const formData = new FormData(form);
+    const data = {};
+    for (let [key, value] of formData.entries()) {
+        data[key] = value;
     }
+
+    // Send to Formspree (for your email records)
+    try {
+        await fetch('https://formspree.io/f/xblypnyk', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify(data )
+        });
+    } catch (error) {
+        console.error('Error sending to Formspree:', error);
+    }
+
+    // Send to Zapier (for your text messages)
+    try {
+        await fetch('https://hooks.zapier.com/hooks/catch/23584178/ubfm7hm/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data )
+        });
+    } catch (error) {
+        console.error('Error sending to Zapier:', error);
+    }
+
+    // Show the "THANK YOU" message
+    document.getElementById('confirmationMessage').textContent = "THANK YOU. A CONFIRMATION TEXT WILL BE SENT SHORTLY WITH PAYMENT OPTIONS.";
+    document.getElementById('confirmationMessage').classList.remove('hidden');
+    form.reset(); // Clear the form fields
+    document.getElementById('result').classList.add('hidden'); // Hide price
+    document.getElementById('pickupAddressDetails').classList.add('hidden'); // Hide address details
+    document.getElementById('dropoffAddressDetails').classList.add('hidden'); // Hide address details
 });
-
-// Reset state if any input field changes after price calculation
-const inputFields = [
-    customerNameInput,
-    pickupDateInput,
-    pickupTimeInput,
-    pickupStreetInput,
-    pickupAptInput,
-    pickupCityInput,
-    pickupStateInput,
-    pickupZipInput, // Keep in this list so changing it resets the form
-    dropoffStreetInput,
-    dropoffAptInput,
-    dropoffCityInput,
-    dropoffStateInput,
-    dropoffZipInput, // Keep in this list so changing it resets the form
-    phoneNumberInput
-];
-
-inputFields.forEach(input => {
-    input.addEventListener('input', () => {
-        if (isPriceCalculated > 0) { // If price was calculated or submitted
-            isPriceCalculated = 0; // Reset to initial state
-            resultDiv.classList.add('hidden');
-            priceLabel.classList.add('hidden');
-            totalPriceDisplay.classList.add('hidden');
-            requestRideButton.classList.remove('hidden'); // Show button
-            requestRideButton.textContent = 'Reserve your Ride'; // Reset button text
-            confirmationMessage.classList.add('hidden'); // Hide confirmation message
-        }
-    });
-});
-
-// --- Initial Setup on DOM Load ---
-window.addEventListener('DOMContentLoaded', () => {
-    // These are the containers for the detailed address inputs, not the display fields
-    const pickupAddressDetails = document.getElementById('pickupAddressDetails');
-    const dropoffAddressDetails = document.getElementById('dropoffAddressDetails');
-
-    // Event listeners for the display fields to show detailed inputs
-    if (pickupAddressDisplay) {
-        pickupAddressDisplay.addEventListener('click', () => {
-            if (pickupAddressDetails) {
-                pickupAddressDetails.classList.remove('hidden');
-                pickupAddressDetails.classList.add('visible'); // Ensure it becomes visible
-                pickupAddressDisplay.classList.add('hidden'); // Hide the display field
-                pickupStreetInput.focus();
-                // Initialize autocomplete when the input becomes visible
-                if (window.google && window.google.maps && window.google.maps.places) {
-                    initializeAutocompleteForInput(pickupStreetInput, 'pickup');
-                } else {
-                    console.warn('Google Maps Places library not yet loaded for autocomplete initialization.');
-                }
-            } else {
-                console.error('Error: pickupAddressDetails element not found for click listener.');
             }
         });
     } else {
