@@ -67,7 +67,7 @@ function loadGoogleMapsScript() {
         script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}&libraries=places&callback=initMap`;
         script.async = true;
         script.defer = true;
-        document.head.appendChild(script );
+        document.head.appendChild(script  );
 
         window.initMap = () => { // Define initMap globally for the callback
             console.log('Google Maps API initialized successfully.');
@@ -265,7 +265,9 @@ phoneNumberInput.addEventListener('input', (e) => {
 });
 
 // Main Request Ride Button Logic
-requestRideButton.addEventListener('click', async () => { // Added async here
+requestRideButton.addEventListener('click', async function(event) { // Changed to async function(event)
+    event.preventDefault(); // Prevent default form submission
+
     if (isPriceCalculated === 0) {
         // First click: Calculate price
         calculatePriceAndPrepareConfirmation();
@@ -299,47 +301,58 @@ requestRideButton.addEventListener('click', async () => { // Added async here
             return; // Stop submission if validation fails
         }
 
-        // Second click: Submit form data asynchronously and show final confirmation message
-        requestRideButton.textContent = 'Submitting...';
-        requestRideButton.disabled = true;
+        // --- Start of NEW Dual Submission Logic ---
 
-        const form = bookingForm;
+        const form = bookingForm; // Use the already defined bookingForm element
         const formData = new FormData(form);
-        const formUrl = form.action;
+        const data = {};
+        for (let [key, value] of formData.entries()) {
+            data[key] = value;
+        }
 
+        // 1. Send to Formspree (for email notifications)
         try {
-            const response = await fetch(formUrl, {
+            const formspreeResponse = await fetch('https://formspree.io/f/xblypnyk', {
                 method: 'POST',
-                body: formData,
                 headers: {
-                    'Accept': 'application/json' // Important for Formspree AJAX
-                }
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify(data )
             });
-
-            if (response.ok) {
-                // Form submitted successfully
-                resultDiv.classList.add('hidden');
-                confirmationMessage.textContent = 'THANK YOU. A CONFIRMATION TEXT WILL BE SENT SHORTLY WITH PAYMENT OPTIONS.';
-                confirmationMessage.classList.remove('hidden');
-                requestRideButton.classList.add('hidden'); // Hide the button after submission
-                isPriceCalculated = 2; // Set to final submitted state
-            } else {
-                // Formspree returned an error (e.g., validation failed)
-                const errorData = await response.json();
-                console.error('Formspree submission error:', errorData);
-                alert('THERE WAS AN ERROR SUBMITTING YOUR REQUEST. PLEASE TRY AGAIN. IF THE PROBLEM PERSISTS, CONTACT US DIRECTLY.');
-                requestRideButton.textContent = 'Confirm Ride'; // Allow retry
-                requestRideButton.disabled = false;
-                isPriceCalculated = 1; // Stay in calculated state
+            if (!formspreeResponse.ok) {
+                console.error('Formspree submission failed:', formspreeResponse.statusText);
+                // Handle Formspree error if needed, but don't stop Zapier submission
             }
         } catch (error) {
-            // Network error or other fetch issue
-            console.error('Network or submission error:', error);
-            alert('COULD NOT CONNECT TO THE SERVER TO SUBMIT YOUR REQUEST. PLEASE CHECK YOUR INTERNET CONNECTION AND TRY AGAIN.');
-            requestRideButton.textContent = 'Confirm Ride'; // Allow retry
-            requestRideButton.disabled = false;
-            isPriceCalculated = 1; // Stay in calculated state
+            console.error('Error sending to Formspree:', error);
         }
+
+        // 2. Send to Zapier Webhook (for SMS)
+        try {
+            const zapierResponse = await fetch('https://hooks.zapier.com/hooks/catch/23584178/ubfm7hm/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data )
+            });
+            if (!zapierResponse.ok) {
+                console.error('Zapier webhook failed:', zapierResponse.statusText);
+            }
+        } catch (error) {
+            console.error('Error sending to Zapier:', error);
+        }
+
+        // --- End of NEW Dual Submission Logic ---
+
+        // Display success message after both attempts
+        document.getElementById('confirmationMessage').textContent = "THANK YOU. A CONFIRMATION TEXT WILL BE SENT SHORTLY WITH PAYMENT OPTIONS.";
+        document.getElementById('confirmationMessage').classList.remove('hidden');
+        form.reset(); // Clear the form
+        document.getElementById('result').classList.add('hidden'); // Hide price result
+        document.getElementById('pickupAddressDetails').classList.add('hidden'); // Hide detailed address fields
+        document.getElementById('dropoffAddressDetails').classList.add('hidden'); // Hide detailed address fields
     }
 });
 
