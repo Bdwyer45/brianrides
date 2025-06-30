@@ -332,9 +332,7 @@ requestRideButton.addEventListener('click', async function(event) { // Changed t
         try {
             const zapierResponse = await fetch('https://hooks.zapier.com/hooks/catch/23584178/ubfm7hm/', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
+                 
                 body: JSON.stringify(data )
             });
             if (!zapierResponse.ok) {
