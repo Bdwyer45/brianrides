@@ -327,21 +327,6 @@ requestRideButton.addEventListener('click', async function(event) { // Changed t
         } catch (error) {
             console.error('Error sending to Formspree:', error);
         }
-
-        // 2. Send to Zapier Webhook (for SMS)
-        try {
-            const zapierResponse = await fetch('https://hooks.zapier.com/hooks/catch/23584178/ubfm7hm/', {
-                method: 'POST',
-                 
-                body: JSON.stringify(data )
-            });
-            if (!zapierResponse.ok) {
-                console.error('Zapier webhook failed:', zapierResponse.statusText);
-            }
-        } catch (error) {
-            console.error('Error sending to Zapier:', error);
-        }
-
         // --- End of NEW Dual Submission Logic ---
 
         // Display success message after both attempts
